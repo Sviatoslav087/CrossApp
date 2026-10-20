@@ -1,10 +1,11 @@
 # CrossApp 
 Наскрізний проєкт з крос-платформного програмування. 
-Предметна область:  Склад. Сутності: BookProduct, BookCopyStockBatch, ReadeWarehouse, Movement. 
+Предметна область:  Склад будівельних матеріалів. Сутності: BookProduct, BookCopyStockBatch, ReadeWarehouse, Movement. 
  Призначення: облік залишків товарів по партіях.  
 ## Запуск 
 dotnet build 
-dotnet run --project src/Cli 
+dotnet run --project src/Clі  
+dotnet run --project src/Cli -- data/valsd.csv//завантаження записів
 ## Середовище 
 .NET SDK 10.0, Windows 11 x64 
 ## Таблиця
