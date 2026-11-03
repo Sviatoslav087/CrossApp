@@ -1,4 +1,3 @@
-
 namespace Core.Dto;
 
 public sealed record ImportResult<T>(

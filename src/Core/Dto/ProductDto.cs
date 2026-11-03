@@ -1,4 +1,3 @@
-
 namespace Core.Dto;
 
 public record ProductDto(
@@ -8,3 +7,5 @@ public record ProductDto(
     string Unit,
     int Quantity,
     string? Note = null);
+
+

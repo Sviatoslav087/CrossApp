@@ -12,3 +12,10 @@ dotnet run --project src/Cli -- data/valsd.csv//завантаження зап�
 RID Режим                  Розмір publish Потрібен runtime
  win-x64 self-contained ~  76,6МБ         ні
  win-x64 framework-dependent ~0.19 МБ     так (.NET 10)
+## Для обробки помилок використовуються:
+ArgumentException,
+ArgumentOutOfRangeException,
+InvalidOperationException.
+## Реалізовані інваріанти:
+Стан об'єкта захищений за допомогою приватного поля
+_quantity та властивостей лише для читання.
