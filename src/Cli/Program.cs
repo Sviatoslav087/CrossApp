@@ -1,25 +1,77 @@
-﻿using Core.Domain;
- Console.WriteLine("=== Сценарій 1: успіх ===");
- Product product = Product.Create("P-001", "sku-001", "Цемент М400 25кг", "шт", 100);
- Console.WriteLine(product);
- product.RegisterArrival(50);
- product.Issue(30);
- Console.WriteLine(product);
- //product.Quantity = -5;
- Console.WriteLine();
- Console.WriteLine("=== Сценарій 2: порушення інваріантів ===");
- TryDo("видача більша за залишок", () => product.Issue(1000));
- TryDo("порожній SKU", () => Product.Create("P-002", " ", "Пісок", "т", 10));
- TryDo("від'ємний залишок", () => Product.Create("P-003", "SKU-003", "Цегла", "шт", -5));
- static void TryDo(string title, Action action)
- {
- try
- {
- action();
- Console.WriteLine($" {title}: виняток НЕ спрацював — інваріант відсутній!");
- }
- catch (Exception ex)
- {
- Console.WriteLine($" {title}: {ex.GetType().Name} — {ex.Message}");
- }
- }
+﻿using Core;
+using Core.Abstractions;
+using Core.Services;
+using Core.Storage;
+
+try
+{
+    // Вибір способу зберігання
+    bool useFile = args.Contains("--file");
+
+    // Шлях до JSON-файлу
+    string dataPath = Path.Combine(
+        AppContext.BaseDirectory,
+        "data",
+        "catalog.json");
+
+    // Створення необхідного сховища
+    ICatalogStore store = useFile
+        ? new FileCatalogStore(dataPath)
+        : new InMemoryCatalogStore(SampleData.Products());
+
+    // Створення сервісу
+    var service = new CatalogService(store);
+
+    Console.WriteLine($"Сховище: {store.GetType().Name}");
+    Console.WriteLine();
+
+    // Додавання товару
+    var created = service.Add(
+        "SKU-101",
+        "Кабель UTP cat6",
+        "м",
+        50);
+
+    Console.WriteLine("Додано новий товар.");
+
+    // Реєстрація надходження
+    service.Receive(created.Id, 25);
+
+    Console.WriteLine("Зареєстровано надходження: 25.");
+    Console.WriteLine();
+
+    // Виведення всіх товарів
+    Console.WriteLine("СПИСОК ТОВАРІВ:");
+
+    foreach (var p in service.All())
+    {
+        Console.WriteLine(
+            $"{p.Id} {p.Sku,-12} {p.Name,-25} {p.Quantity,5} {p.Unit}");
+    }
+
+    // Пошук товару
+    var found = service.Find(created.Id);
+
+    Console.WriteLine();
+    Console.WriteLine(
+        found != null
+            ? $"Знайдено товар: {found.Name}"
+            : "Товар не знайдено.");
+
+    // Сценарій відмови
+    Console.WriteLine();
+    Console.WriteLine("ПЕРЕВІРКА ПОМИЛКИ:");
+
+    try
+    {
+        service.Receive("UNKNOWN", 10);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine($"Помилка: {ex.Message}");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Критична помилка: {ex.Message}");
+}
